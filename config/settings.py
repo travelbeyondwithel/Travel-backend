@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-# import os
+import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +22,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-uw3@8iwj0e7%qhr!*%q&kf2!8begjlc7h)hh#6et&!oldp6t9s'
+# SECRET_KEY = 'django-insecure-uw3@8iwj0e7%qhr!*%q&kf2!8begjlc7h)hh#6et&!oldp6t9s'
+
+# New Production key
+SECRET_KEY = '$w&lc-6jrgxentqaq8c6@gg57xrgcv27b+hk%_r^dhsv_6e!+_'
+
+
+# Security settings
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-local-development-only-change-this-key"
+)
+
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -53,6 +65,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.security.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -89,12 +102,26 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database configuration
+DATABASES_URL = os.environ.get("DATABASE_URL")
+
+if DATABASES_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASES_URL,
+            conn_max_age=0,
+            conn_health_checks=True,
+        )
     }
-}
+
+else:
+    # Local development fallback
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -131,7 +158,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
@@ -139,10 +166,18 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-]
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+# ALLOWED_HOSTS = [
+#     "127.0.0.1",
+#     "localhost",
+# ]
 
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = 'staff'
 
@@ -197,10 +232,15 @@ TRUST_PROXY_IP = False
 #     'False'
 # ).lower() == 'true'
 
-# SECURE_PROXY_SSL_HEADER = (
-#     'HTTP_X_FORWARDED_PROTO',
-#     'https',
-# )
+SECURE_PROXY_SSL_HEADER = (
+    'HTTP_X_FORWARDED_PROTO',
+    'https',
+)
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # SECURE_SSL_REDIRECT = os.getenv(
 #     'SECURE_SSL_REDIRECT',
@@ -217,13 +257,41 @@ TRUST_PROXY_IP = False
 #     'False'
 # ).lower() == 'true'
 
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        "ALLOWED_HOSTS",
+        "127.0.0.1, localhost"
+    ).split(",")
+    if host.strip()
 ]
 
+CORS_ALLOW_CREDENTIALS = False
+
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:5173"
+    ).split(",")
+    if origin.strip()
+]
+
+# Cloudflare Pages address
+# CSRF_TRUSTED_ORIGINS = [
+#     "https://"
+# ]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get(
+        "CORS_TRUSTED_ORIGINS",
+        "http://localhost:5173"
+    ).split(",")
+    if origin.strip()
+]
 # Media files (CSS, JavaScript, Images)
+
 
 MEDIA_URL = '/media/'
 
