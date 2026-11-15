@@ -273,7 +273,7 @@ ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get(
         "ALLOWED_HOSTS",
-        "127.0.0.1, localhost"
+        "https://travel-backend-pvq4.onrender.com"
     ).split(",")
     if host.strip()
 ]
