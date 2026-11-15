@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     
     # Your Apps
     'articles',
-    'static',
+    # 'static',
 ]
 
 MIDDLEWARE = [
