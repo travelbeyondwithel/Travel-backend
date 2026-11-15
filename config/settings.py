@@ -14,9 +14,13 @@ from pathlib import Path
 import os
 import dj_database_url
 
+# from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# load_dotenv(BASE_DIR.parent.parent / 'backup' / '.env' )
+# BASE_DIR.parent.parent / 'backup' / 'env'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -25,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECRET_KEY = 'django-insecure-uw3@8iwj0e7%qhr!*%q&kf2!8begjlc7h)hh#6et&!oldp6t9s'
 
 # New Production key
-SECRET_KEY = '$w&lc-6jrgxentqaq8c6@gg57xrgcv27b+hk%_r^dhsv_6e!+_'
+# SECRET_KEY = '$w&lc-6jrgxentqaq8c6@gg57xrgcv27b+hk%_r^dhsv_6e!+_'
 
 
 # Security settings
@@ -34,10 +38,9 @@ SECRET_KEY = os.environ.get(
     "django-insecure-local-development-only-change-this-key"
 )
 
-DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
 
 
@@ -51,6 +54,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_ckeditor_5',
+    
+    'cloudinary',
+    'cloudinary_storage',
     
     # 3 party Apps
     'corsheaders',
@@ -168,12 +174,19 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
 # ALLOWED_HOSTS = [
 #     "127.0.0.1",
 #     "localhost",
@@ -266,7 +279,7 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
-CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     origin.strip()
@@ -285,7 +298,7 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
-        "CORS_TRUSTED_ORIGINS",
+        "CSRF_TRUSTED_ORIGINS",
         "http://localhost:5173"
     ).split(",")
     if origin.strip()
