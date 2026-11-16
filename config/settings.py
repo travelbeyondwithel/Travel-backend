@@ -70,6 +70,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'config.middleware.ExceptionLoggingMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -82,7 +83,7 @@ MIDDLEWARE = [
 REST_FRAMEWORK = {'DEFAULT_PERMISSION_CLASSES': [
     'rest_framework.permissions.AllowAny']}
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'config.urls'
 
@@ -244,13 +245,18 @@ TRUST_PROXY_IP = False
 #     'False'
 # ).lower() == 'true'
 
+# Render HTTPS / reverse proxy configuration
+
 SECURE_PROXY_SSL_HEADER = (
-    'HTTP_X_FORWARDED_PROTO',
-    'https',
+    "HTTP_X_FORWARDED_PROTO",
+    "https",
 )
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
@@ -273,7 +279,7 @@ ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get(
         "ALLOWED_HOSTS",
-        "https://travel-backend-pvq4.onrender.com"
+        "travel-backend-pvq4.onrender.com, localhost, 127.0.0.1"
     ).split(",")
     if host.strip()
 ]
@@ -284,7 +290,7 @@ CORS_ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
         "CORS_ALLOWED_ORIGINS",
-        "http://localhost:5173"
+        "http://localhost:5173, https://travel-fronend.pages.dev"
     ).split(",")
     if origin.strip()
 ]
@@ -298,7 +304,7 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
         "CSRF_TRUSTED_ORIGINS",
-        "http://localhost:5173"
+        "http://localhost:5173, https://travel-fronend.pages.dev"
     ).split(",")
     if origin.strip()
 ]
@@ -330,3 +336,38 @@ TRAVEL_SUPPORT = {
     # Replace this with your actual PayPal.me link
     'url': 'http://www.paypal.me/EliasLang',
 }
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": True,
+        },
+    },
+}
+
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "handlers": {
+#         "console": {
+#             "class": "logging.StreamHandler",
+#         },
+#     },
+#     "loggers": {
+#         "django.request": {
+#             "handlers": ["console"],
+#             "level": "ERROR",
+#             "propagate": False,
+#         },
+#     },
+# }
