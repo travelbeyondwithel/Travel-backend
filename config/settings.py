@@ -185,12 +185,18 @@ CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    'PREFIX': '',
 }
 
-# ALLOWED_HOSTS = [
-#     "127.0.0.1",
-#     "localhost",
-# ]
+# Media files (CSS, JavaScript, Images)
+
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# CKEDITOR_5_FILE_UPLOAD_PERMISSION
+
 
 CKEDITOR_5_FILE_UPLOAD_PERMISSION = 'staff'
 
@@ -308,12 +314,7 @@ CSRF_TRUSTED_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
-# Media files (CSS, JavaScript, Images)
 
-
-MEDIA_URL = '/media/'
-
-MEDIA_ROOT = BASE_DIR / 'media'
 
 
 
