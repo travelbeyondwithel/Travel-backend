@@ -28,6 +28,7 @@ from .models import (
     WebsitePage,
 )
 
+from .media_utils import get_optimized_image_url
 class AuthorSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -202,6 +203,10 @@ class ArticleSerializer(serializers.ModelSerializer):
     published_at = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
     
+    hero_image_400 = serializers.SerializerMethodField()
+    hero_image_800 = serializers.SerializerMethodField()
+    hero_image_1200 = serializers.SerializerMethodField()
+    
     class Meta:
         model = Article
         fields = [
@@ -219,6 +224,9 @@ class ArticleSerializer(serializers.ModelSerializer):
             'hero_image',
             'hero_image_alt',
             'hero_image_caption',
+            'hero_image_400',
+            'hero_image_800',
+            'hero_image_1200',
             'published_at',
             'views',
             'likes',
@@ -250,6 +258,15 @@ class ArticleSerializer(serializers.ModelSerializer):
     #         return obj.category.name
         
         # return 'Travel'
+        
+    def get_hero_image_400(self, obj):
+        return get_optimized_image_url(obj.hero_image, 400)
+        
+    def get_hero_image_800(self, obj):
+        return get_optimized_image_url(obj.hero_image, 800)
+        
+    def get_hero_image_1200(self, obj):
+        return get_optimized_image_url(obj.hero_image, 1200)
 
 
 
